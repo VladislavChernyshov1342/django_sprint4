@@ -7,7 +7,8 @@ app_name = 'blog'
 urlpatterns = [
     path('', index, name='index'),
     path('posts/<int:post_id>/', post_detail, name='post_detail'),
-    path('category/<slug:post_category>/', category_posts, name='category_posts'),
+    path('category/<slug:post_category>/', category_posts,
+         name='category_posts'),
     path('profile/<username>/', profile, name='profile'),
     path(
         'posts/<int:pk>/edit/',
@@ -20,7 +21,8 @@ urlpatterns = [
         name='delete_post'
     ),
     path('posts/create/', views.PostCreateView.as_view(), name='create_post'),
-    path('posts/<post_id>/comment/', views.CommentCreateView.as_view(), name='add_comment'),
+    path('posts/<post_id>/comment/', views.CommentCreateView.as_view(),
+         name='add_comment'),
     path(
         'edit_profile/',
         views.ProfileUpdateView.as_view(),

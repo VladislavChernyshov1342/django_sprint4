@@ -1,12 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post, Category, Comment
-from core.constants import ORDERBY
 from core.utils import filter_post
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required
 from .forms import CommentForm, PostForm, UserForm
 from django.core.paginator import Paginator
 from datetime import date
@@ -79,7 +77,6 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
-<<<<<<< HEAD
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -88,21 +85,13 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         username = self.request.user
         return reverse_lazy('blog:profile', kwargs={'username': username})
-=======
->>>>>>> 5f8589108cda31f140d44f060126dc1459a2c46a
 
-    def form_valid(self, form):
-       form.instance.author = self.request.user
-       return super().form_valid(form)
-
-    def get_success_url(self):
-        username = self.request.user
-        return reverse_lazy('blog:profile', kwargs={'username': username})
 
 def profile(request, username):
     template = 'blog/profile.html'
     user = get_object_or_404(User, username=username)
-    post_list = Post.objects.filter(author__username=username).order_by("-pub_date").annotate(
+    post_list = Post.objects.filter(author__username=username).order_by(
+        "-pub_date").annotate(
         comment_count=Count('comments')
     )
     paginator = Paginator(post_list, 10)
@@ -154,18 +143,6 @@ class PostDeleteView(UserPassesTestMixin, DeleteView):
     def get_login_url(self):
         object = self.get_object()
         return reverse_lazy('blog:post_detail', kwargs={'post_id': object.pk})
-
-
-#@login_required
-#def add_comment(request, post_id):
-#    post = get_object_or_404(Post, pk=post_id)
-#    form = CommentForm(request.POST)
-#    if form.is_valid():
-#        comment = form.save(commit=False)
-#        comment.author = request.user
-#        comment.post = post
-#        comment.save()
-#    return redirect('blog:post_detail', post_id=post_id)
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):

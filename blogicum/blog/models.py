@@ -85,7 +85,7 @@ class Post(BaseModel1):
 class Comment(models.Model):
     text = models.TextField('Текст коментария')
     post = models.ForeignKey(
-        Post, 
+        Post,
         on_delete=models.CASCADE,
         related_name='comments',
     )
