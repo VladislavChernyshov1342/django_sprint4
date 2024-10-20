@@ -79,6 +79,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
+<<<<<<< HEAD
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -87,7 +88,16 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         username = self.request.user
         return reverse_lazy('blog:profile', kwargs={'username': username})
+=======
+>>>>>>> 5f8589108cda31f140d44f060126dc1459a2c46a
 
+    def form_valid(self, form):
+       form.instance.author = self.request.user
+       return super().form_valid(form)
+
+    def get_success_url(self):
+        username = self.request.user
+        return reverse_lazy('blog:profile', kwargs={'username': username})
 
 def profile(request, username):
     template = 'blog/profile.html'
