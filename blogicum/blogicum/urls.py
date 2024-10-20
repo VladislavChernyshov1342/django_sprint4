@@ -6,9 +6,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-handler403 = 'core.views.csrf_failure'
-handler404 = 'core.views.page_not_found'
-handler500 = 'core.views.page_error500'
+handler404 = 'pages.views.page_not_found'
+handler500 = 'pages.views.server_error'
 
 
 urlpatterns = [
