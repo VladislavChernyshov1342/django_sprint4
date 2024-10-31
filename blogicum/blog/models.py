@@ -1,13 +1,18 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from core.models import BaseModel1
-from core.constants import MAXLENGTH
+from core.models import CreateAtMixin, IsPublishedMixin
+from core.constants import (MAXLENGTH,
+                            SHORT_TITLE_CATEGORY,
+                            SHORT_TEXT_COMMENT,
+                            SHORT_NAME_LOCATION,
+                            SHORT_TITLE_POST
+                            )
 
 
 User = get_user_model()
 
 
-class Location(BaseModel1):
+class Location(CreateAtMixin, IsPublishedMixin):
     name = models.CharField(
         max_length=MAXLENGTH,
         verbose_name='Название места'
@@ -18,10 +23,10 @@ class Location(BaseModel1):
         verbose_name_plural = 'Местоположения'
 
     def __str__(self):
-        return self.name
+        return self.name[:SHORT_NAME_LOCATION]
 
 
-class Category(BaseModel1):
+class Category(CreateAtMixin, IsPublishedMixin):
     title = models.CharField(max_length=MAXLENGTH, verbose_name='Заголовок')
     description = models.TextField(verbose_name='Описание')
     slug = models.SlugField(
@@ -36,10 +41,10 @@ class Category(BaseModel1):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.title
+        return self.title[:SHORT_TITLE_CATEGORY]
 
 
-class Post(BaseModel1):
+class Post(CreateAtMixin, IsPublishedMixin):
     title = models.CharField(max_length=MAXLENGTH, verbose_name='Заголовок')
     text = models.TextField(verbose_name='Текст')
     image = models.ImageField(
@@ -77,20 +82,23 @@ class Post(BaseModel1):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.title
-
-# Миграция модели Comment не сделана!!!
+        return self.title[:SHORT_TITLE_POST]
 
 
-class Comment(models.Model):
+class Comment(CreateAtMixin):
     text = models.TextField('Текст коментария')
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
         related_name='comments',
     )
-    created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
         ordering = ('created_at',)
+
+    def __str__(self):
+        return (self.text[:SHORT_TEXT_COMMENT] + '...'
+                if len(self.text) > SHORT_TEXT_COMMENT else self.text)

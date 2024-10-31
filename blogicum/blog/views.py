@@ -9,6 +9,7 @@ from .forms import CommentForm, PostForm, UserForm
 from django.core.paginator import Paginator
 from datetime import date
 from django.db.models import Count
+from .mixin import UserTestAuthMixin, FormValidMixin
 
 
 def post_detail(request, post_id):
@@ -101,7 +102,7 @@ def profile(request, username):
     return render(request, template, context)
 
 
-class PostUpdateView(UserPassesTestMixin, UpdateView):
+class PostUpdateView(UserTestAuthMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
@@ -109,14 +110,6 @@ class PostUpdateView(UserPassesTestMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         self.post_object = get_object_or_404(Post, pk=kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
-
-    def test_func(self):
-        if self.post_object.author == self.request.user:
-            return True
-        if not self.request.user.is_authenticated:
-            return False
-        object = self.get_object()
-        return object.author == self.request.user
 
     def handle_no_permission(self):
         post_id = self.post_object.id
@@ -178,7 +171,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('blog:post_detail', kwargs={'post_id': post_id})
 
 
-class CommentUpdateView(UserPassesTestMixin, UpdateView):
+class CommentUpdateView(UserTestAuthMixin, FormValidMixin, UpdateView):
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment.html'
@@ -187,25 +180,12 @@ class CommentUpdateView(UserPassesTestMixin, UpdateView):
         self.post_object = get_object_or_404(Comment, pk=kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
 
-    def test_func(self):
-        if self.post_object.author == self.request.user:
-            return True
-        if not self.request.user.is_authenticated:
-            return False
-        object = self.get_object()
-        return object.author == self.request.user
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        form.instance.post = self.object.post
-        return super().form_valid(form)
-
     def get_success_url(self):
         post_id = self.object.post_id
         return reverse_lazy('blog:post_detail', kwargs={'post_id': post_id})
 
 
-class CommentDeleteView(UserPassesTestMixin, DeleteView):
+class CommentDeleteView(FormValidMixin, DeleteView):
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment.html'
@@ -213,11 +193,6 @@ class CommentDeleteView(UserPassesTestMixin, DeleteView):
     def test_func(self):
         object = self.get_object()
         return object.author == self.request.user
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        form.instance.post = self.object.post
-        return super().form_valid(form)
 
     def get_success_url(self):
         post_id = self.object.post_id
